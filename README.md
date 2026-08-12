@@ -170,3 +170,5 @@ completes, since they're independent of one another.
 
 ---
 
+## 4. Actual Execution
+![dag](docs/dag.PNG)
