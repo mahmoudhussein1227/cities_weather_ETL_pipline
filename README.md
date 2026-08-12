@@ -108,7 +108,7 @@ ingest() >> load() >> spark_transform >> [load_weather_summary(), load_min_max()
 | `ingest` | `@task` (PythonOperator via TaskFlow) | Calls `scripts.ingest.run()` to produce the local CSV of city weather data. |
 | `load` | `@task` | Uploads the local CSV to the `airflow` S3 bucket via `S3Hook` (conn: `aws_default_2`), keyed as `{country}_cities_{date}.csv`. `replace=True` — noted in the code as **for testing only**, should be `False` in production. |
 | `spark_transform` | `SparkSubmitOperator` | Runs `transform.py` on the Spark cluster (conn: `spark_default`), passing `country` as an application argument. |
-| `load_weather_summary` | `@task` | Uses `PostgresHook` (conn: `postgres_localhost`) to `CREATE TABLE IF NOT EXISTS {country}_weather_summary_{date}` and bulk-loads the hot/cold classification CSV via `COPY ... FROM STDIN`. |
+| `load_weather_summary` | `@task` | Uses `PostgresHook` (conn: `postgres_localhost`) to `CREATE TABLE IF NOT EXISTS {country}_weather_summary_{date}` and full-loads the hot/cold classification CSV via `COPY ... FROM STDIN`. |
 | `load_min_max` | `@task` | Same pattern as above, loading the min/max extremes CSV into `{country}_weather_min_max_{date}`. |
 
 Both PostgreSQL load tasks run **in parallel** after `spark_transform`
@@ -172,3 +172,29 @@ completes, since they're independent of one another.
 
 ## 4. Actual Execution
 ![dag](docs/dag.PNG)
+
+## 6. Repository Structure
+ 
+```
+cities_weather_ETL_pipline/
+├── Dockerfile                      # Container image for the Airflow environment
+├── LICENSE
+├── README.md
+├── requirements.txt                # Python dependencies
+├── docs/
+│   ├── workflow arch.png           # Pipeline architecture diagram (used above)
+│   ├── dag.PNG                     # Airflow DAG graph view screenshot
+│   └── postgres tables.PNG         # Screenshot of loaded PostgreSQL tables
+└── dags/
+    ├── dag_weather_to_s3.py        # Main Airflow DAG definition
+    ├── data/
+    │   └── germany_cities.txt      # Input list of city names for ingestion
+    ├── results/                    # Generated pipeline outputs (bronze/silver CSVs)
+    │   ├── germany_cities.csv              # Bronze: raw ingested weather data
+    │   ├── germany_weather_info.csv/       # Silver: min/max extremes (Spark output dir)
+    │   └── germany_weather_summary.csv/    # Silver: hot/cold classification (Spark output dir)
+    └── scripts/
+        ├── __init__.py
+        ├── ingest.py                # Extraction logic (Open-Meteo API → CSV)
+        └── transform.py             # Spark transformation logic
+```
