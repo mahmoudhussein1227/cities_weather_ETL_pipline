@@ -8,7 +8,7 @@ cities from the [Open-Meteo](https://open-meteo.com/) API, lands the raw data in
 S3 (bronze layer), transforms it with Apache Spark (silver layer), and loads the
 results into PostgreSQL (gold layer).
 
-![ETL pipeline overview](docs/workflow_arch.png)
+![ETL pipeline overview](docs/workflow%20arch.png)
 
 | Stage | Tool | Layer | Format |
 |---|---|---|---|
