@@ -75,9 +75,11 @@ def weather_to_aws_S3():
                         max_temp float,
                         min_temp float,
                         mean_temp float,
-                        weather_condition varchar(50))'''
-        hook.run(sql=create_sql)
+                        weather_condition varchar(50)) ;
 
+                        truncate table {country}_weather_summary_{date}; '''
+        
+        hook.run(sql=create_sql)
         #2 load the data from csv to the table
         sql_copy = f'''copy {country}_weather_summary_{date} (city , country , date , max_temp , min_temp , mean_temp , weather_condition)
                     from STDIN
@@ -98,7 +100,9 @@ def weather_to_aws_S3():
                         country varchar (250),
                         date date,
                         max_temp float,
-                        min_temp float)
+                        min_temp float);
+
+                        truncate table {country}_weather_min_max_{date};
                     '''
         hook.run(sql=create_sql)
 

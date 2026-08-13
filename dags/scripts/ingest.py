@@ -14,21 +14,21 @@ import pandas as pd
 def get_city_weather(city:str , count:int , country : str) -> dict : 
     url = f"https://geocoding-api.open-meteo.com/v1/search?name={city}&count={count}&language=en&format=json"
 
-    if(requests.get(url=url).status_code != 200):
+    geocoding_api_resp = requests.get(url=url)
+
+    if(geocoding_api_resp.status_code != 200):
         return None
-    elif('results' not in requests.get(url=url).json().keys()):
+    elif('results' not in geocoding_api_resp.json().keys()):
         return None
 
-    geocoding_api_resp = requests.get(url=url).json()
-
-    api_country = geocoding_api_resp['results'][0]['country']
+    api_country = geocoding_api_resp.json()['results'][0]['country']
 
     if(country != api_country.lower()):
         print(f"The city : {city} you look for does not belong to this country : {country}")
         return None
     else:
-        latitude  = geocoding_api_resp['results'][0]['latitude']
-        longitude = geocoding_api_resp['results'][0]['longitude']
+        latitude  = geocoding_api_resp.json()['results'][0]['latitude']
+        longitude = geocoding_api_resp.json()['results'][0]['longitude']
 
         # 2nd : we need to get the weather using the info above
 
